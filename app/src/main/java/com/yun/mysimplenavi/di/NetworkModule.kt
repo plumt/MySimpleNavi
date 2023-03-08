@@ -48,4 +48,16 @@ object NetworkModule {
             .client(client)
             .build()
     }
+
+    @Singleton
+    @Provides
+    @Named("navi")
+    fun provideSignalNaviRetrofit(client: OkHttpClient): Retrofit {
+        return Retrofit.Builder()
+            .baseUrl("https://routing.openstreetmap.de")
+            .addConverterFactory(GsonConverterFactory.create(GsonBuilder().setLenient().create()))
+            .addCallAdapterFactory(RxJava3CallAdapterFactory.create())
+            .client(client)
+            .build()
+    }
 }

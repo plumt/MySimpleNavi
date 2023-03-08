@@ -19,13 +19,21 @@
         android:name="com.yun.mysimplenavi.ui.search.KeywordSearchFragment"
         android:label="KeywordSearchFragment" >
         <action
-            android:id="@+id/action_keywordSearchFragment_to_findMapFragment"
-            app:destination="@id/findMapFragment" />
+            android:id="@+id/action_keywordSearchFragment_to_preViewMapFragment"
+            app:destination="@id/preViewMapFragment" />
     </fragment>
     <fragment
         android:id="@+id/findMapFragment"
-        android:name="com.yun.mysimplenavi.ui.find.FindMapFragment"
+        android:name="com.yun.mysimplenavi.ui.map.find.FindMapFragment"
         android:label="FindMapFragment" />
+    <fragment
+        android:id="@+id/preViewMapFragment"
+        android:name="com.yun.mysimplenavi.ui.map.preview.PreViewMapFragment"
+        android:label="PreViewMapFragment" >
+        <action
+            android:id="@+id/action_preViewMapFragment_to_findMapFragment"
+            app:destination="@id/findMapFragment" />
+    </fragment>
 
 
 </navigation>

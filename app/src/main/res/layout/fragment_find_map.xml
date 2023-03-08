@@ -4,18 +4,18 @@
     <data>
 
         <variable
-            name="findMap"
-            type="com.yun.mysimplenavi.ui.find.FindMapViewModel" />
+            name="find"
+            type="com.yun.mysimplenavi.ui.map.find.FindMapViewModel" />
     </data>
 
     <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
-                <RelativeLayout
-                    android:id="@+id/map_view"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent" />
+        <RelativeLayout
+            android:id="@+id/map_view"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 

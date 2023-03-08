@@ -26,4 +26,16 @@ object ApiModule {
     @Provides
     @Named("kakao")
     fun providerKakaoRepository(@Named("kakao") api: Api) = ApiRepository(api)
+
+    @Singleton
+    @Provides
+    @Named("navi")
+    fun providerNaviApi(@Named("navi") retrofit: Retrofit): Api {
+        return retrofit.create(Api::class.java)
+    }
+
+    @Singleton
+    @Provides
+    @Named("navi")
+    fun providerNaviRepository(@Named("navi") api: Api) = ApiRepository(api)
 }

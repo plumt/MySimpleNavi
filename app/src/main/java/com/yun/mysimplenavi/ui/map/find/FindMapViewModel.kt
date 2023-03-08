@@ -1,4 +1,4 @@
-package com.yun.mysimplenavi.ui.find
+package com.yun.mysimplenavi.ui.map.find
 
 import androidx.lifecycle.ViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel

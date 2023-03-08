@@ -35,7 +35,7 @@ class KeywordSearchFragment : BaseFragment<FragmentKeywordSearchBinding, Keyword
                     BR.keywordSearchListener
                 ){
                     override fun onItemClick(item: KeywordSearchModel.RS.Documents, view: View) {
-                        navigate(R.id.action_keywordSearchFragment_to_findMapFragment, Bundle().apply {
+                        navigate(R.id.action_keywordSearchFragment_to_preViewMapFragment, Bundle().apply {
                             putString("lon",item.lon)
                             putString("lat",item.lat)
                             putString("name",item.place_name)

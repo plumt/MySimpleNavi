@@ -10,5 +10,4 @@ class MainViewModel @Inject constructor(
 
 ) : ViewModel() {
 
-    val title = MutableLiveData("")
 }

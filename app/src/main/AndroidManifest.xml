@@ -19,6 +19,9 @@
         android:theme="@style/Theme.MySimpleNavi"
         android:usesCleartextTraffic="true"
         tools:targetApi="31">
+
+        <meta-data android:name="com.kakao.sdk.AppKey" android:value="d91782b8b82dbe268a6c85beba4a8b3c"/>
+
         <activity
             android:name=".ui.main.MainActivity"
             android:exported="true">

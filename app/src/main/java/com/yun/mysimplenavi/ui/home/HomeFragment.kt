@@ -14,6 +14,7 @@ import com.yun.mysimplenavi.base.BaseFragment
 import com.yun.mysimplenavi.databinding.FragmentHomeBinding
 import com.yun.mysimplenavi.ui.main.MainViewModel
 import dagger.hilt.android.AndroidEntryPoint
+import net.daum.mf.map.api.MapView
 
 @AndroidEntryPoint
 class HomeFragment : BaseFragment<FragmentHomeBinding, HomeViewModel>(HomeViewModel::class.java) {
@@ -21,13 +22,14 @@ class HomeFragment : BaseFragment<FragmentHomeBinding, HomeViewModel>(HomeViewMo
     override val viewModel: HomeViewModel by viewModels()
     override fun setVariable(): Int = BR.home
 
+    private var mMapView: MapView? = null
+
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        mMapView = MapView(requireActivity())
 
-        sharedViewModel.title.observe(viewLifecycleOwner){
-            viewModel.title.value = sharedViewModel.title.value
-        }
+        binding.mapView.addView(mMapView)
 
     }
 }

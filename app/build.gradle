@@ -100,8 +100,8 @@ dependencies {
     implementation 'com.tickaroo.tikxml:retrofit-converter:0.8.13'
 
 
-//    implementation fileTree(include: ['*.jar'], dir: 'libs')
-//    implementation files('libs/libDaumMapAndroid.jar')
+    implementation fileTree(include: ['*.jar'], dir: 'libs')
+    implementation files('libs/libDaumMapAndroid.jar')
 
     implementation 'com.google.android.gms:play-services-maps:17.0.0'
 }

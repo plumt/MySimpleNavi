@@ -9,5 +9,23 @@
         android:id="@+id/homeFragment"
         android:name="com.yun.mysimplenavi.ui.home.HomeFragment"
         android:label="HomeFragment" >
+        <action
+            android:id="@+id/action_homeFragment_to_keywordSearchFragment"
+            app:destination="@id/keywordSearchFragment" />
     </fragment>
+
+    <fragment
+        android:id="@+id/keywordSearchFragment"
+        android:name="com.yun.mysimplenavi.ui.search.KeywordSearchFragment"
+        android:label="KeywordSearchFragment" >
+        <action
+            android:id="@+id/action_keywordSearchFragment_to_findMapFragment"
+            app:destination="@id/findMapFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/findMapFragment"
+        android:name="com.yun.mysimplenavi.ui.find.FindMapFragment"
+        android:label="FindMapFragment" />
+
+
 </navigation>

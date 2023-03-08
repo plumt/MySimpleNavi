@@ -17,19 +17,24 @@ import dagger.hilt.android.AndroidEntryPoint
 import net.daum.mf.map.api.MapView
 
 @AndroidEntryPoint
-class HomeFragment : BaseFragment<FragmentHomeBinding, HomeViewModel>(HomeViewModel::class.java) {
+class HomeFragment : BaseFragment<FragmentHomeBinding, HomeViewModel>() {
 
     override val viewModel: HomeViewModel by viewModels()
     override fun setVariable(): Int = BR.home
+    override fun getResourceId(): Int = R.layout.fragment_home
 
-    private var mMapView: MapView? = null
+
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        mMapView = MapView(requireActivity())
 
-        binding.mapView.addView(mMapView)
+
+        binding.run {
+            btnKeyword.setOnClickListener {
+                navigate(R.id.action_homeFragment_to_keywordSearchFragment)
+            }
+        }
 
     }
 }

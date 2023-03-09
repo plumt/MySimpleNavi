@@ -23,17 +23,21 @@ class HomeFragment : BaseFragment<FragmentHomeBinding, HomeViewModel>() {
     override fun setVariable(): Int = BR.home
     override fun getResourceId(): Int = R.layout.fragment_home
 
-
-
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
 
 
         binding.run {
+
             btnKeyword.setOnClickListener {
                 navigate(R.id.action_homeFragment_to_keywordSearchFragment)
             }
+
+            btnMap.setOnClickListener {
+                navigate(R.id.action_homeFragment_to_mapSearchFragment)
+            }
+
         }
 
     }

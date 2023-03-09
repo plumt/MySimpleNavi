@@ -12,18 +12,18 @@
         <action
             android:id="@+id/action_homeFragment_to_keywordSearchFragment"
             app:destination="@id/keywordSearchFragment" />
+        <action
+            android:id="@+id/action_homeFragment_to_mapSearchFragment"
+            app:destination="@id/mapSearchFragment" />
     </fragment>
 
     <fragment
         android:id="@+id/keywordSearchFragment"
-        android:name="com.yun.mysimplenavi.ui.search.KeywordSearchFragment"
+        android:name="com.yun.mysimplenavi.ui.search.keyword.KeywordSearchFragment"
         android:label="KeywordSearchFragment" >
         <action
             android:id="@+id/action_keywordSearchFragment_to_preViewMapFragment"
             app:destination="@id/preViewMapFragment" />
-        <action
-            android:id="@+id/action_keywordSearchFragment_to_findMapFragment"
-            app:destination="@id/findMapFragment" />
     </fragment>
     <fragment
         android:id="@+id/findMapFragment"
@@ -36,6 +36,14 @@
         <action
             android:id="@+id/action_preViewMapFragment_to_findMapFragment"
             app:destination="@id/findMapFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/mapSearchFragment"
+        android:name="com.yun.mysimplenavi.ui.search.map.MapSearchFragment"
+        android:label="MapSearchFragment" >
+        <action
+            android:id="@+id/action_mapSearchFragment_to_preViewMapFragment"
+            app:destination="@id/preViewMapFragment" />
     </fragment>
 
 

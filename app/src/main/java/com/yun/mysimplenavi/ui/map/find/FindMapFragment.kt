@@ -5,6 +5,7 @@ import android.content.Context
 import android.graphics.Color
 import android.location.Criteria
 import android.location.Location
+import android.location.LocationListener
 import android.location.LocationManager
 import android.os.Bundle
 import android.os.Handler
@@ -15,6 +16,9 @@ import com.google.android.gms.maps.model.LatLng
 import com.yun.mysimplenavi.R
 import com.yun.mysimplenavi.BR
 import com.yun.mysimplenavi.base.BaseFragment
+import com.yun.mysimplenavi.common.constants.GpsConstants.WAY_OFF_DISTANCE
+import com.yun.mysimplenavi.common.constants.GpsConstants.WAY_OFF_ROUTE_MAX_COUNT
+import com.yun.mysimplenavi.common.constants.GpsConstants.WAY_POINT_DISTANCE
 import com.yun.mysimplenavi.databinding.FragmentFindMapBinding
 import com.yun.mysimplenavi.util.PolyUtil.isLocationOnEdge
 import com.yun.mysimplenavi.util.PolyUtil.isLocationOnPath
@@ -34,7 +38,7 @@ class FindMapFragment : BaseFragment<FragmentFindMapBinding, FindMapViewModel>()
     private var mMapView: MapView? = null
 
     /**
-     * 현재 위치 라이브러리
+     * 현재 위치
      */
     private var locationManager: LocationManager? = null
 
@@ -48,19 +52,21 @@ class FindMapFragment : BaseFragment<FragmentFindMapBinding, FindMapViewModel>()
 
         locationManager =
             requireActivity().getSystemService(Context.LOCATION_SERVICE) as LocationManager
+
         locationManager!!.requestLocationUpdates(
-            locationManager!!.getBestProvider(Criteria(), false)!!, 2000, 1.0f
-        ) {
-            onLocationChanged(it)
-        }
+            locationManager!!.getBestProvider(Criteria(), false)!!, 2000, 1.0f, locationListener
+        )
 
-        val lon = arguments?.getString("lon")
-        val lat = arguments?.getString("lat")
-        val name = arguments?.getString("name")
 
-        if (lat != null && lon != null && name != null) {
-            viewModel.openStreetMapNavigation(lat.toDouble(), lon.toDouble())
-            addMarker(lat.toDouble(), lon.toDouble(), name)
+        viewModel.endLon = arguments?.getString("endLon")?.toDouble()
+        viewModel.endLat = arguments?.getString("endLat")?.toDouble()
+        viewModel.userLatLon[0] = arguments?.getString("startLat")?.toDouble()?:0.0
+        viewModel.userLatLon[1] = arguments?.getString("startLon")?.toDouble()?:0.0
+        viewModel.endName = arguments?.getString("name")
+
+        if (viewModel.endLon != null && viewModel.endLat != null && viewModel.endName != null && viewModel.userLatLon[0] != 0.0 && viewModel.userLatLon[1] != 0.0) {
+            viewModel.openStreetMapNavigation(viewModel.endLat!!, viewModel.endLon!!)
+            addMarker(viewModel.endLat!!, viewModel.endLon!!, viewModel.endName!!)
         }
 
         viewModel.isLoading.observe(viewLifecycleOwner) {
@@ -79,23 +85,27 @@ class FindMapFragment : BaseFragment<FragmentFindMapBinding, FindMapViewModel>()
      * gps cahnged listener
      */
     @SuppressLint("MissingPermission")
-    fun onLocationChanged(p0: Location) {
+    private val locationListener = object : LocationListener {
+
+        override fun onLocationChanged(p0: Location) {
 
 //        if(viewModel.latitude == 0.0){
 //            viewModel.callMapAPi(p0.latitude,p0.longitude)
 //        }
-        viewModel.userLatLon[0] = p0.latitude
-        viewModel.userLatLon[1] = p0.longitude
-        if (viewModel.arrayLatLngRoute.size > 0) {
-            locationOnPathCheck()
-            locationWayPoint()
+
+            viewModel.userLatLon[0] = p0.latitude
+            viewModel.userLatLon[1] = p0.longitude
+            if (viewModel.arrayLatLngRoute.size > 0) {
+                locationOnPathCheck()
+                locationWayPoint()
+            }
+            Log.d(
+                "lys",
+                "location : ${p0.latitude} ${p0.longitude} ${
+                    SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(p0.time)
+                }"
+            )
         }
-//        Log.d(
-//            "lys",
-//            "location : ${p0.latitude} ${p0.longitude} ${
-//                SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(p0.time)
-//            }"
-//        )
     }
 
     /**
@@ -131,15 +141,17 @@ class FindMapFragment : BaseFragment<FragmentFindMapBinding, FindMapViewModel>()
                     )
                 )
                 viewModel.arrayLatLngWPTitle.add(
-                    if(it.maneuver.type == "depart") "안내를 시작합니다"
-                    else if(it.maneuver.type == "arrive") "목적지 주변입니다"
-                    else if(it.maneuver.modifier.contains("right")) "잠시 후 우회전입니다"
-                    else if(it.maneuver.modifier.contains("left")) "잠시 후 좌회전입니다"
-                    else if(it.maneuver.modifier.contains("uturn")) "잠시 후 유턴입니다"
+                    if (it.maneuver.type == "depart") "안내를 시작합니다"
+                    else if (it.maneuver.type == "arrive") "목적지 주변입니다"
+                    else if (it.maneuver.modifier.contains("right")) "잠시 후 우회전입니다"
+                    else if (it.maneuver.modifier.contains("left")) "잠시 후 좌회전입니다"
+                    else if (it.maneuver.modifier.contains("uturn")) "잠시 후 유턴입니다"
                     else ""
                 )
-                addMarker(it.maneuver.location[1],it.maneuver.location[0],
-                if(it.maneuver.type == "depart" || it.maneuver.type == "arrive") it.maneuver.type else it.maneuver.modifier)
+                addMarker(
+                    it.maneuver.location[1], it.maneuver.location[0],
+                    if (it.maneuver.type == "depart" || it.maneuver.type == "arrive") it.maneuver.type else it.maneuver.modifier
+                )
             }
 
             mMapView!!.addPolyline(this)
@@ -159,6 +171,12 @@ class FindMapFragment : BaseFragment<FragmentFindMapBinding, FindMapViewModel>()
         mMapView!!.addPOIItem(marker)
     }
 
+    private fun clearMap(){
+        mMapView!!.removeAllPolylines()
+        mMapView!!.removeAllPOIItems()
+        mMapView!!.removeAllCircles()
+    }
+
 
     /**
      * 경로 이탈 체크 함수
@@ -168,14 +186,24 @@ class FindMapFragment : BaseFragment<FragmentFindMapBinding, FindMapViewModel>()
             LatLng(viewModel.userLatLon[0], viewModel.userLatLon[1]),
             viewModel.arrayLatLngRoute,
             true,
-            50.0
+            WAY_OFF_DISTANCE
         )
-        if (!isRoute) {
-        Log.d("lys", "경로이탈 --> ${isRoute}")
+        if (!isRoute && viewModel.offRoute != -1) {
             mapNotify("경로를 이탈하셨습니다")
+            if(WAY_OFF_ROUTE_MAX_COUNT <= viewModel.offRoute){
+                clearMap()
+                Log.d("lys", "경로이탈 --> ${isRoute}")
 //            speakTTS("경로를 이탈하셨습니다")
 //            binding.clear.performClick()
 //            viewModel.callMapAPi()
+                viewModel.offRoute = -1
+                viewModel.openStreetMapNavigation(viewModel.endLat!!, viewModel.endLon!!)
+                addMarker(viewModel.endLat!!, viewModel.endLon!!, viewModel.endName!!)
+            } else {
+                viewModel.offRoute++
+            }
+        } else {
+            viewModel.offRoute = 0
         }
     }
 
@@ -195,10 +223,13 @@ class FindMapFragment : BaseFragment<FragmentFindMapBinding, FindMapViewModel>()
             LatLng(viewModel.userLatLon[0], viewModel.userLatLon[1]),
             arrayLatLngVia,
             true,
-            30.0
+            WAY_POINT_DISTANCE
         )
         if (isWayPoint) {
-            Log.d("lys", "way : ${viewModel.arrayLatLngWayPoint[viewModel.arrayLatLngIndex]} >> ${viewModel.arrayLatLngWPTitle[viewModel.arrayLatLngIndex]}")
+            Log.d(
+                "lys",
+                "way : ${viewModel.arrayLatLngWayPoint[viewModel.arrayLatLngIndex]} >> ${viewModel.arrayLatLngWPTitle[viewModel.arrayLatLngIndex]}"
+            )
 //            speakTTS(viewModel.arrayLatLngRouteTitle[viewModel.arrayLatLngIndex])
             mapNotify(viewModel.arrayLatLngWPTitle[viewModel.arrayLatLngIndex])
             viewModel.arrayLatLngIndex++
@@ -208,8 +239,8 @@ class FindMapFragment : BaseFragment<FragmentFindMapBinding, FindMapViewModel>()
     /**
      * 지도 위 알림 텍스트 노출
      */
-    private fun mapNotify(text: String){
-        if(viewModel.notifyComment.value == ""){
+    private fun mapNotify(text: String) {
+        if (viewModel.notifyComment.value == "") {
             viewModel.notifyComment.value = text
             Handler().postDelayed({
                 viewModel.notifyComment.value = ""
@@ -218,11 +249,13 @@ class FindMapFragment : BaseFragment<FragmentFindMapBinding, FindMapViewModel>()
     }
 
     /**
-     * onStop
+     * onDestroy
      * 프래그먼트 종료시 맵뷰 지워야 함 > 에러방지
      */
-    override fun onStop() {
+    override fun onDestroy() {
+        Log.d("lys","FindMapFragment onDestroy")
         binding.mapView.removeView(mMapView)
-        super.onStop()
+        locationManager!!.removeUpdates(locationListener)
+        super.onDestroy()
     }
 }

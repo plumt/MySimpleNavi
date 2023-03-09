@@ -1,9 +1,17 @@
 package com.yun.mysimplenavi.ui.map.preview
 
+import android.annotation.SuppressLint
+import android.content.Context
 import android.graphics.Color
+import android.location.Criteria
+import android.location.Location
+import android.location.LocationListener
+import android.location.LocationManager
 import android.os.Bundle
+import android.util.Log
 import android.view.View
 import androidx.fragment.app.viewModels
+import androidx.navigation.NavOptions
 import androidx.navigation.fragment.findNavController
 import com.yun.mysimplenavi.R
 import com.yun.mysimplenavi.BR
@@ -20,6 +28,12 @@ class PreViewMapFragment : BaseFragment<FragmentPreviewMapBinding, PreViewMapVie
 
     private var mMapView: MapView? = null
 
+    /**
+     * 현재 위치
+     */
+    private var locationManager: LocationManager? = null
+
+    @SuppressLint("MissingPermission")
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
@@ -31,14 +45,22 @@ class PreViewMapFragment : BaseFragment<FragmentPreviewMapBinding, PreViewMapVie
         val lat = arguments?.getString("lat")
         val name = arguments?.getString("name")
 
+        locationManager =
+            requireActivity().getSystemService(Context.LOCATION_SERVICE) as LocationManager
+
+        locationManager!!.requestLocationUpdates(
+            locationManager!!.getBestProvider(Criteria(), false)!!, 2000, 1.0f, locationListener
+        )
+
         binding.btnFind.setOnClickListener {
             binding.mapView.removeView(mMapView)
-            findNavController().popBackStack()
-            navigate(R.id.action_keywordSearchFragment_to_findMapFragment, Bundle().apply {
-                putString("lon", lon)
-                putString("lat", lat)
+            navigate(R.id.action_preViewMapFragment_to_findMapFragment, Bundle().apply {
+                putString("endLon", lon)
+                putString("endLat", lat)
+                putString("startLon",viewModel.userLatLon[1].toString())
+                putString("startLat",viewModel.userLatLon[0].toString())
                 putString("name", name)
-            })
+            }, NavOptions.Builder().setPopUpTo(R.id.preViewMapFragment, true).build())
         }
 
         binding.mapView.addView(mMapView)
@@ -53,13 +75,35 @@ class PreViewMapFragment : BaseFragment<FragmentPreviewMapBinding, PreViewMapVie
             }
         }
 
-        if (lat != null && lon != null && name != null) {
-            viewModel.openStreetMapNavigation(lat.toDouble(), lon.toDouble())
+        locationManager!!.getLastKnownLocation(
+            locationManager!!.getBestProvider(
+                Criteria(),
+                false
+            )!!
+        )?.run {
+            if (lat != null && lon != null && name != null) {
+                viewModel.userLatLon[0] = latitude
+                viewModel.userLatLon[1] = longitude
+                viewModel.openStreetMapNavigation(
+                    latitude,
+                    longitude,
+                    lat.toDouble(),
+                    lon.toDouble()
+                )
 //            mMapView!!.setMapCenterPointAndZoomLevel(MapPoint.mapPointWithGeoCoord(lat.toDouble(),lon.toDouble()),0,true)
-            addMarker(37.5473480673073, 127.065782814398, "start")
-            addMarker(lat.toDouble(), lon.toDouble(), name)
+                addMarker(latitude, longitude, "start")
+                addMarker(lat.toDouble(), lon.toDouble(), name)
+            }
         }
+    }
 
+    /**
+     * gps cahnged listener
+     */
+    @SuppressLint("MissingPermission")
+    private val locationListener = object : LocationListener {
+
+        override fun onLocationChanged(p0: Location) {}
     }
 
     /**
@@ -112,11 +156,12 @@ class PreViewMapFragment : BaseFragment<FragmentPreviewMapBinding, PreViewMapVie
     }
 
     /**
-     * onStop
+     * onDestroy
      * 프래그먼트 종료시 맵뷰 지워야 함 > 에러방지
      */
-    override fun onStop() {
+    override fun onDestroy() {
+        Log.d("lys", "PreViewMapFragment onDestroy")
         binding.mapView.removeView(mMapView)
-        super.onStop()
+        super.onDestroy()
     }
 }

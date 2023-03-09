@@ -12,15 +12,28 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
-
-
         <Button
+            android:id="@+id/btn_keyword"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            app:layout_constraintTop_toTopOf="parent"
-            android:text="keyword"
-            android:id="@+id/btn_keyword"
-            />
+            android:layout_marginBottom="30dp"
+            android:text="장소 검색"
+            app:layout_constraintBottom_toTopOf="@id/gl_horizontal_half" />
+
+        <Button
+            android:id="@+id/btn_map"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="30dp"
+            android:text="지도에서 검색"
+            app:layout_constraintTop_toBottomOf="@id/gl_horizontal_half" />
+
+        <androidx.constraintlayout.widget.Guideline
+            android:id="@+id/gl_horizontal_half"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            app:layout_constraintGuide_percent="0.5" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 

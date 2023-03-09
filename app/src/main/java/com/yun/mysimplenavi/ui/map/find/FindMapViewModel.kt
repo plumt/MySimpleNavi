@@ -63,6 +63,10 @@ class FindMapViewModel @Inject constructor(
      */
     var userLatLon = DoubleArray(2) { 0.0 }
 
+    var endLon: Double? = null
+    var endLat: Double? = null
+    var endName: String? = null
+
     /**
      * openstreetmap api 호출 함수
      * @param endLat 도착지점 위도 Double
@@ -70,7 +74,7 @@ class FindMapViewModel @Inject constructor(
      */
     fun openStreetMapNavigation(endLat: Double, endLon: Double) {
         isLoading.value = true
-        val start = "127.065782,37.547348;"
+        val start = "${userLatLon[1]},${userLatLon[0]};"
         val end = "$endLon,$endLat"
         val path = start + end
         Log.d("lys", "path : $path")
@@ -79,14 +83,28 @@ class FindMapViewModel @Inject constructor(
             .flatMap { Observable.just(it) }
             .observeOn(AndroidSchedulers.mainThread())
             .map {
+                clear()
                 Log.d("lys", "result : $it")
                 openStreetRoutes.value = it
+                offRoute = 0
             }.subscribe({
                 isLoading.value = false
                 Log.d("lys", "success")
             }, {
+                clear()
                 isLoading.value = false
                 Log.e("lys", "fail : ${it.message}")
             })
+    }
+
+    /**
+     * 길안내 관련 변수 초기화
+     */
+    private fun clear(){
+        arrayLatLngWayPoint.clear()
+        arrayLatLngWPTitle.clear()
+        arrayLatLngRoute.clear()
+        arrayLatLngIndex = 0
+        offRoute = 0
     }
 }

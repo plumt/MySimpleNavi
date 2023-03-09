@@ -1,4 +1,4 @@
-package com.yun.mysimplenavi.ui.search
+package com.yun.mysimplenavi.ui.search.keyword
 
 import android.util.Log
 import androidx.lifecycle.MutableLiveData

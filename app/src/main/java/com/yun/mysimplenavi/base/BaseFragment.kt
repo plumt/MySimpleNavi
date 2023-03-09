@@ -10,6 +10,7 @@ import androidx.databinding.ViewDataBinding
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.ViewModel
+import androidx.navigation.NavOptions
 import androidx.navigation.findNavController
 import com.yun.mysimplenavi.BR
 import com.yun.mysimplenavi.R
@@ -28,11 +29,12 @@ abstract class BaseFragment<B : ViewDataBinding, M : ViewModel> : Fragment() {
 
     val sharedViewModel: MainViewModel by activityViewModels()
 
-    fun navigate(resId: Int, bundle: Bundle? = null) {
+    fun navigate(resId: Int, bundle: Bundle? = null, options: NavOptions? = null) {
         try {
-            bundle?.apply {
-                view?.findNavController()?.navigate(resId, this)
-            } ?: view?.findNavController()?.navigate(resId)
+//            bundle?.apply {
+//                view?.findNavController()?.navigate(resId, this,options)
+//            } ?: view?.findNavController()?.navigate(resId,bundle,options)
+            view?.findNavController()?.navigate(resId,bundle,options)
         } catch (e: Exception) {
             e.printStackTrace()
         }

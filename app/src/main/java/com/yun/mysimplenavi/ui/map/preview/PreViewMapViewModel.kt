@@ -39,13 +39,25 @@ class PreViewMapViewModel @Inject constructor(
     val distance = MutableLiveData("")
 
     /**
+     * 유저 현재 위치 좌표
+     */
+    var userLatLon = DoubleArray(2) { 0.0 }
+
+    /**
      * openstreetmap api 호출 함수
+     * @param startLat 시작지점 위도 Double
+     * @param startLon 시작지점 경도 Double
      * @param endLat 도착지점 위도 Double
      * @param endLon 도착지점 경도 Double
      */
-    fun openStreetMapNavigation(endLat: Double, endLon: Double) {
+    fun openStreetMapNavigation(
+        startLat: Double,
+        startLon: Double,
+        endLat: Double,
+        endLon: Double
+    ) {
         isLoading.value = true
-        val start = "127.065782,37.547348;"
+        val start = "${startLon},${startLat};"
         val end = "$endLon,$endLat"
         val path = start + end
         Log.d("lys", "path : $path")
@@ -59,7 +71,11 @@ class PreViewMapViewModel @Inject constructor(
                 distance.value = Util.formatDistance(it.routes?.get(0)?.distance ?: 0.0)
                 val convertDuration =
                     Util.convertSeconds((it.routes?.get(0)?.duration?.toInt() ?: 0))
-                duration.value = durationConvert(convertDuration.first, convertDuration.second, convertDuration.third)
+                duration.value = durationConvert(
+                    convertDuration.first,
+                    convertDuration.second,
+                    convertDuration.third
+                )
             }.subscribe({
                 isLoading.value = false
                 Log.d("lys", "success")

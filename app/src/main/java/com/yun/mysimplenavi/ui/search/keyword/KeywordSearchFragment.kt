@@ -1,9 +1,9 @@
-package com.yun.mysimplenavi.ui.search
+package com.yun.mysimplenavi.ui.search.keyword
 
 import android.os.Bundle
 import android.view.View
-import android.widget.Toast
 import androidx.fragment.app.viewModels
+import androidx.navigation.NavOptions
 import com.yun.mysimplenavi.R
 import com.yun.mysimplenavi.BR
 import com.yun.mysimplenavi.base.BaseFragment
@@ -39,7 +39,7 @@ class KeywordSearchFragment : BaseFragment<FragmentKeywordSearchBinding, Keyword
                             putString("lon",item.lon)
                             putString("lat",item.lat)
                             putString("name",item.place_name)
-                        })
+                        }, NavOptions.Builder().setPopUpTo(R.id.keywordSearchFragment, true).build())
                     }
 
                     override fun onItemLongClick(

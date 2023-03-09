@@ -11,6 +11,7 @@ import androidx.navigation.NavController
 import androidx.navigation.Navigation
 import com.yun.mysimplenavi.R
 import com.yun.mysimplenavi.databinding.ActivityMainBinding
+import com.yun.mysimplenavi.ui.dialog.LoadingDialog
 import dagger.hilt.android.AndroidEntryPoint
 import java.security.MessageDigest
 
@@ -20,6 +21,7 @@ class MainActivity : AppCompatActivity() {
     private val mainViewModel: MainViewModel by viewModels()
     lateinit var binding: ActivityMainBinding
     lateinit var navController: NavController
+    lateinit var dialog: LoadingDialog
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 //        setContentView(R.layout.activity_main)
@@ -32,7 +34,10 @@ class MainActivity : AppCompatActivity() {
 
         navController = Navigation.findNavController(this, R.id.nav_host_fragment)
 
-
+        mainViewModel.isLoading.observe(this){
+            if(it) dialog.show()
+            else dialog.dismiss()
+        }
 
         keyHash()
 

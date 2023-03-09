@@ -10,4 +10,6 @@ class MainViewModel @Inject constructor(
 
 ) : ViewModel() {
 
+    val isLoading = MutableLiveData(false)
+
 }

@@ -7,7 +7,8 @@ class OpenStreetMapModel {
     ){
         data class Route(
             val legs: ArrayList<Leg>?,
-            val distance: String?
+            val distance: Double?,
+            val duration: Double?,
         ){
             data class Leg(
                 val steps: ArrayList<Step>?

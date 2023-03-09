@@ -3,6 +3,8 @@
 
     <data>
 
+        <import type="android.view.View" />
+
         <variable
             name="preview"
             type="com.yun.mysimplenavi.ui.map.preview.PreViewMapViewModel" />
@@ -16,13 +18,40 @@
             android:id="@+id/map_view"
             android:layout_width="match_parent"
             android:layout_height="0dp"
-            app:layout_constraintBottom_toTopOf="@id/btn_find"
+            app:layout_constraintBottom_toTopOf="@id/tv_duration"
             app:layout_constraintTop_toTopOf="parent" />
+
+        <TextView
+            android:id="@+id/tv_duration"
+            android:layout_width="0dp"
+            android:layout_height="30dp"
+            android:gravity="center"
+            android:maxLines="1"
+            android:text="@{`총 소요 시간 : `+preview.duration}"
+            android:textSize="13sp"
+            android:visibility="@{preview.duration.equals(``) ? View.INVISIBLE : View.VISIBLE}"
+            app:layout_constraintBottom_toTopOf="@id/btn_find"
+            app:layout_constraintEnd_toStartOf="@id/tv_distance"
+            app:layout_constraintStart_toStartOf="parent" />
+
+        <TextView
+            android:id="@+id/tv_distance"
+            android:layout_width="0dp"
+            android:layout_height="30dp"
+            android:gravity="center"
+            android:maxLines="1"
+            android:text="@{`총 이동 거리 : ` + preview.distance}"
+            android:textSize="13sp"
+            android:visibility="@{preview.distance.equals(``) ? View.INVISIBLE : View.VISIBLE}"
+            app:layout_constraintBottom_toTopOf="@id/btn_find"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toEndOf="@id/tv_duration" />
 
         <Button
             android:id="@+id/btn_find"
             android:layout_width="match_parent"
             android:layout_height="50dp"
+            android:visibility="@{preview.distance.equals(``) ? View.INVISIBLE : View.VISIBLE}"
             android:text="길찾기"
             app:layout_constraintBottom_toBottomOf="parent" />
 

@@ -21,6 +21,9 @@
         <action
             android:id="@+id/action_keywordSearchFragment_to_preViewMapFragment"
             app:destination="@id/preViewMapFragment" />
+        <action
+            android:id="@+id/action_keywordSearchFragment_to_findMapFragment"
+            app:destination="@id/findMapFragment" />
     </fragment>
     <fragment
         android:id="@+id/findMapFragment"

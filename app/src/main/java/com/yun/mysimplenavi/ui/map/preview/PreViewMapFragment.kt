@@ -4,6 +4,7 @@ import android.graphics.Color
 import android.os.Bundle
 import android.view.View
 import androidx.fragment.app.viewModels
+import androidx.navigation.fragment.findNavController
 import com.yun.mysimplenavi.R
 import com.yun.mysimplenavi.BR
 import com.yun.mysimplenavi.base.BaseFragment
@@ -23,28 +24,39 @@ class PreViewMapFragment : BaseFragment<FragmentPreviewMapBinding, PreViewMapVie
         super.onViewCreated(view, savedInstanceState)
 
         mMapView = MapView(requireActivity())
-
-        binding.btnFind.setOnClickListener {
-            navigate(R.id.action_preViewMapFragment_to_findMapFragment)
-        }
-
-        binding.mapView.addView(mMapView)
-
-        viewModel.openStreetRoutes.observe(viewLifecycleOwner){
-            if((it.routes?.size ?: -1) > 0){
-                addPolyLine()
-            }
-        }
-
+        mMapView!!.currentLocationTrackingMode = MapView.CurrentLocationTrackingMode.TrackingModeOff
+        mMapView!!.setShowCurrentLocationMarker(false)
 
         val lon = arguments?.getString("lon")
         val lat = arguments?.getString("lat")
         val name = arguments?.getString("name")
 
+        binding.btnFind.setOnClickListener {
+            binding.mapView.removeView(mMapView)
+            findNavController().popBackStack()
+            navigate(R.id.action_keywordSearchFragment_to_findMapFragment, Bundle().apply {
+                putString("lon", lon)
+                putString("lat", lat)
+                putString("name", name)
+            })
+        }
+
+        binding.mapView.addView(mMapView)
+
+        viewModel.isLoading.observe(viewLifecycleOwner){
+            sharedViewModel.isLoading.value = it
+        }
+
+        viewModel.openStreetRoutes.observe(viewLifecycleOwner) {
+            if ((it.routes?.size ?: -1) > 0) {
+                addPolyLine()
+            }
+        }
+
         if (lat != null && lon != null && name != null) {
             viewModel.openStreetMapNavigation(lat.toDouble(), lon.toDouble())
 //            mMapView!!.setMapCenterPointAndZoomLevel(MapPoint.mapPointWithGeoCoord(lat.toDouble(),lon.toDouble()),0,true)
-            addMarker(37.5473480673073,127.065782814398,"start")
+            addMarker(37.5473480673073, 127.065782814398, "start")
             addMarker(lat.toDouble(), lon.toDouble(), name)
         }
 

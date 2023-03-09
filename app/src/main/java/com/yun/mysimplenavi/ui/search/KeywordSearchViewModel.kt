@@ -27,9 +27,11 @@ class KeywordSearchViewModel @Inject constructor(
             .flatMap { Observable.just(it) }
             .observeOn(AndroidSchedulers.mainThread())
             .map {
+                val temp = arrayListOf<KeywordSearchModel.RS.Documents>()
                 it.documents!!.forEachIndexed { index, documents ->
-                    keywordSearchResults.add(keywordSearchModelDocumentItem(index, documents))
+                    temp.add(keywordSearchModelDocumentItem(index, documents))
                 }
+                keywordSearchResults.value = temp
             }.subscribe({
                 Log.d("lys", "success")
             }, {

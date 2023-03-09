@@ -43,7 +43,7 @@ class PreViewMapFragment : BaseFragment<FragmentPreviewMapBinding, PreViewMapVie
 
         binding.mapView.addView(mMapView)
 
-        viewModel.isLoading.observe(viewLifecycleOwner){
+        viewModel.isLoading.observe(viewLifecycleOwner) {
             sharedViewModel.isLoading.value = it
         }
 
@@ -62,6 +62,9 @@ class PreViewMapFragment : BaseFragment<FragmentPreviewMapBinding, PreViewMapVie
 
     }
 
+    /**
+     * polyLine 그리는 함수
+     */
     private fun addPolyLine() {
         val mPolyline = MapPolyline()
         MapPolyline().apply {
@@ -96,6 +99,9 @@ class PreViewMapFragment : BaseFragment<FragmentPreviewMapBinding, PreViewMapVie
         )
     }
 
+    /**
+     * marker 추가 함수
+     */
     private fun addMarker(lat: Double, lon: Double, name: String) {
         val uNowPosition = MapPoint.mapPointWithGeoCoord(lat, lon)
         val marker = MapPOIItem()
@@ -103,5 +109,14 @@ class PreViewMapFragment : BaseFragment<FragmentPreviewMapBinding, PreViewMapVie
         marker.mapPoint = uNowPosition
         marker.markerType = MapPOIItem.MarkerType.RedPin
         mMapView!!.addPOIItem(marker)
+    }
+
+    /**
+     * onStop
+     * 프래그먼트 종료시 맵뷰 지워야 함 > 에러방지
+     */
+    override fun onStop() {
+        binding.mapView.removeView(mMapView)
+        super.onStop()
     }
 }

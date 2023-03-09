@@ -18,12 +18,31 @@ class PreViewMapViewModel @Inject constructor(
     @Named("navi") private val api: ApiRepository
 ) : ViewModel() {
 
+    /**
+     * 통신 중 로딩 프로그레스바 노출
+     */
     val isLoading = MutableLiveData(false)
+
+    /**
+     * openstreetmap result data
+     */
     val openStreetRoutes = MutableLiveData<OpenStreetMapModel.RS>()
 
+    /**
+     * 총 소요 시간
+     */
     val duration = MutableLiveData("")
+
+    /**
+     * 총 이동 거리
+     */
     val distance = MutableLiveData("")
 
+    /**
+     * openstreetmap api 호출 함수
+     * @param endLat 도착지점 위도 Double
+     * @param endLon 도착지점 경도 Double
+     */
     fun openStreetMapNavigation(endLat: Double, endLon: Double) {
         isLoading.value = true
         val start = "127.065782,37.547348;"
@@ -50,6 +69,12 @@ class PreViewMapViewModel @Inject constructor(
             })
     }
 
+    /**
+     * duration(초) > 시 분 초 형태로 변환
+     * @param hour 시간 Int
+     * @param minute 분 Int
+     * @param second 초 Int
+     */
     private fun durationConvert(hour: Int, minute: Int, second: Int): String {
         var result = ""
         if (hour != 0) result += "${hour}시"

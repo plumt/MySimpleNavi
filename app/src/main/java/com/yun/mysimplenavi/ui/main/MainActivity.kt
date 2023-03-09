@@ -33,7 +33,7 @@ class MainActivity : AppCompatActivity() {
         }
 
         navController = Navigation.findNavController(this, R.id.nav_host_fragment)
-
+        dialog = LoadingDialog(this)
         mainViewModel.isLoading.observe(this){
             if(it) dialog.show()
             else dialog.dismiss()

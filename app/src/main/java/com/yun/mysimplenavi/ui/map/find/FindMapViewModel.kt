@@ -3,10 +3,9 @@ package com.yun.mysimplenavi.ui.map.find
 import android.util.Log
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
-import com.google.android.gms.common.api.Api
+import com.google.android.gms.maps.model.LatLng
 import com.yun.mysimplenavi.data.model.OpenStreetMapModel
 import com.yun.mysimplenavi.data.repository.ApiRepository
-import com.yun.mysimplenavi.util.Util
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
 import io.reactivex.rxjava3.core.Observable
@@ -19,10 +18,56 @@ class FindMapViewModel @Inject constructor(
     @Named("navi") private val api: ApiRepository
 ) : ViewModel() {
 
+    /**
+     * 통신 중 로딩 프로그레스바 노출
+     */
     val isLoading = MutableLiveData(false)
 
+    /**
+     * openstreetmap result data
+     */
     val openStreetRoutes = MutableLiveData<OpenStreetMapModel.RS>()
 
+    /**
+     * wp list
+     */
+    val arrayLatLngWayPoint = arrayListOf<LatLng>()
+
+    /**
+     * wp title
+     */
+    val arrayLatLngWPTitle = arrayListOf<String>()
+
+    /**
+     * polyline list
+     */
+    val arrayLatLngRoute = arrayListOf<LatLng>()
+
+    /**
+     * wp point index
+     */
+    var arrayLatLngIndex = 0
+
+    /**
+     * 경로 이탈 카운트
+     */
+    var offRoute = 0
+
+    /**
+     * 경로 이탈 및 wp 접근 알림
+     */
+    val notifyComment = MutableLiveData<String>("")
+
+    /**
+     * 유저 현재 위치 좌표
+     */
+    var userLatLon = DoubleArray(2) { 0.0 }
+
+    /**
+     * openstreetmap api 호출 함수
+     * @param endLat 도착지점 위도 Double
+     * @param endLon 도착지점 경도 Double
+     */
     fun openStreetMapNavigation(endLat: Double, endLon: Double) {
         isLoading.value = true
         val start = "127.065782,37.547348;"

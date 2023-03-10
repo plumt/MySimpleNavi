@@ -1,10 +1,27 @@
 package com.yun.mysimplenavi.common.constants
 
-object GpsConstants {
+class GpsConstants {
 
-    const val WAY_POINT_DISTANCE = 30.0
-    const val WAY_OFF_DISTANCE = 50.0
+    companion object {
 
-    const val WAY_OFF_ROUTE_MAX_COUNT = 3
+        const val WAY_OFF_ROUTE_MAX_COUNT = 3
+    }
+
+    object Distance {
+        const val WAY_POINT_DISTANCE = 30.0
+        const val WAY_OFF_DISTANCE = 50.0
+    }
+
+    object WayPoint {
+        const val RIGHT = "right"
+        const val SLIGHT_RIGHT = "slight right"
+        const val LEFT = "left"
+        const val SLIGHT_LEFT = "slight left"
+        const val STRAIGHT = "straight"
+        const val U_TURN = "uturn"
+        const val DEPART = "depart"
+        const val ARRIVE = "arrive"
+    }
+
 
 }

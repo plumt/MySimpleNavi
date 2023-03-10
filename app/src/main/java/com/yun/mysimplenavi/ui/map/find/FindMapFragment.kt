@@ -1,6 +1,7 @@
 package com.yun.mysimplenavi.ui.map.find
 
 import android.annotation.SuppressLint
+import android.app.AlertDialog
 import android.content.Context
 import android.graphics.Color
 import android.location.Criteria
@@ -11,26 +12,32 @@ import android.os.Bundle
 import android.os.Handler
 import android.util.Log
 import android.view.View
+import android.widget.Toast
 import androidx.fragment.app.viewModels
+import androidx.navigation.fragment.findNavController
 import com.google.android.gms.maps.model.LatLng
 import com.yun.mysimplenavi.R
 import com.yun.mysimplenavi.BR
 import com.yun.mysimplenavi.base.BaseFragment
-import com.yun.mysimplenavi.common.constants.GpsConstants.WAY_OFF_DISTANCE
-import com.yun.mysimplenavi.common.constants.GpsConstants.WAY_OFF_ROUTE_MAX_COUNT
-import com.yun.mysimplenavi.common.constants.GpsConstants.WAY_POINT_DISTANCE
+import com.yun.mysimplenavi.common.constants.GpsConstants
+import com.yun.mysimplenavi.common.constants.GpsConstants.Companion.WAY_OFF_ROUTE_MAX_COUNT
+import com.yun.mysimplenavi.common.constants.GpsConstants.Distance.WAY_OFF_DISTANCE
+import com.yun.mysimplenavi.common.constants.GpsConstants.Distance.WAY_POINT_DISTANCE
 import com.yun.mysimplenavi.databinding.FragmentFindMapBinding
 import com.yun.mysimplenavi.util.PolyUtil.isLocationOnEdge
 import com.yun.mysimplenavi.util.PolyUtil.isLocationOnPath
 import dagger.hilt.android.AndroidEntryPoint
 import net.daum.mf.map.api.*
-import java.text.SimpleDateFormat
 
 @AndroidEntryPoint
 class FindMapFragment : BaseFragment<FragmentFindMapBinding, FindMapViewModel>() {
     override val viewModel: FindMapViewModel by viewModels()
     override fun getResourceId(): Int = R.layout.fragment_find_map
     override fun setVariable(): Int = BR.find
+    override fun isOnBackEvent(): Boolean = true
+    override fun onBackEvent() {
+        Toast.makeText(requireActivity(),"backEvent!",Toast.LENGTH_SHORT).show()
+    }
 
     /**
      * kakao mapview
@@ -42,7 +49,6 @@ class FindMapFragment : BaseFragment<FragmentFindMapBinding, FindMapViewModel>()
      */
     private var locationManager: LocationManager? = null
 
-    @SuppressLint("MissingPermission")
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
@@ -53,32 +59,21 @@ class FindMapFragment : BaseFragment<FragmentFindMapBinding, FindMapViewModel>()
         locationManager =
             requireActivity().getSystemService(Context.LOCATION_SERVICE) as LocationManager
 
-        locationManager!!.requestLocationUpdates(
-            locationManager!!.getBestProvider(Criteria(), false)!!, 2000, 1.0f, locationListener
-        )
+        startRouteGuidance()
 
-
-        viewModel.endLon = arguments?.getString("endLon")?.toDouble()
-        viewModel.endLat = arguments?.getString("endLat")?.toDouble()
-        viewModel.userLatLon[0] = arguments?.getString("startLat")?.toDouble()?:0.0
-        viewModel.userLatLon[1] = arguments?.getString("startLon")?.toDouble()?:0.0
-        viewModel.endName = arguments?.getString("name")
-
-        if (viewModel.endLon != null && viewModel.endLat != null && viewModel.endName != null && viewModel.userLatLon[0] != 0.0 && viewModel.userLatLon[1] != 0.0) {
-            viewModel.openStreetMapNavigation(viewModel.endLat!!, viewModel.endLon!!)
-            addMarker(viewModel.endLat!!, viewModel.endLon!!, viewModel.endName!!)
-        }
-
+        /**
+         * 로딩 다이알로그 show / hide
+         */
         viewModel.isLoading.observe(viewLifecycleOwner) {
             sharedViewModel.isLoading.value = it
         }
 
+        /**
+         * 길찾기 데이터로 polyLine 추가
+         */
         viewModel.openStreetRoutes.observe(viewLifecycleOwner) {
-            if ((it.routes?.size ?: -1) > 0) {
-                addPolyLine()
-            }
+            if ((it.routes?.size ?: -1) > 0) addPolyLine()
         }
-
     }
 
     /**
@@ -89,22 +84,13 @@ class FindMapFragment : BaseFragment<FragmentFindMapBinding, FindMapViewModel>()
 
         override fun onLocationChanged(p0: Location) {
 
-//        if(viewModel.latitude == 0.0){
-//            viewModel.callMapAPi(p0.latitude,p0.longitude)
-//        }
-
             viewModel.userLatLon[0] = p0.latitude
             viewModel.userLatLon[1] = p0.longitude
             if (viewModel.arrayLatLngRoute.size > 0) {
                 locationOnPathCheck()
                 locationWayPoint()
             }
-            Log.d(
-                "lys",
-                "location : ${p0.latitude} ${p0.longitude} ${
-                    SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(p0.time)
-                }"
-            )
+//            Log.d("lys", "location : ${p0.latitude} ${p0.longitude} ${SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(p0.time)}")
         }
     }
 
@@ -141,16 +127,14 @@ class FindMapFragment : BaseFragment<FragmentFindMapBinding, FindMapViewModel>()
                     )
                 )
                 viewModel.arrayLatLngWPTitle.add(
-                    if (it.maneuver.type == "depart") "안내를 시작합니다"
-                    else if (it.maneuver.type == "arrive") "목적지 주변입니다"
-                    else if (it.maneuver.modifier.contains("right")) "잠시 후 우회전입니다"
-                    else if (it.maneuver.modifier.contains("left")) "잠시 후 좌회전입니다"
-                    else if (it.maneuver.modifier.contains("uturn")) "잠시 후 유턴입니다"
-                    else ""
+                    wpEventTitle(
+                        it.maneuver.type,
+                        it.maneuver.modifier
+                    )
                 )
                 addMarker(
                     it.maneuver.location[1], it.maneuver.location[0],
-                    if (it.maneuver.type == "depart" || it.maneuver.type == "arrive") it.maneuver.type else it.maneuver.modifier
+                    if (wpEventCheck(it.maneuver.type)) it.maneuver.type else it.maneuver.modifier
                 )
             }
 
@@ -171,11 +155,22 @@ class FindMapFragment : BaseFragment<FragmentFindMapBinding, FindMapViewModel>()
         mMapView!!.addPOIItem(marker)
     }
 
-    private fun clearMap(){
+    /**
+     * 맵뷰 객체 초기화
+     */
+    private fun clearMap() {
         mMapView!!.removeAllPolylines()
         mMapView!!.removeAllPOIItems()
         mMapView!!.removeAllCircles()
     }
+
+    /**
+     * 시작 지점, 도착 지점 좌표 데이터 체크
+     */
+    private fun gpsDataSettingCheck() =
+        viewModel.run {
+            endLon != null && endLat != null && endName != null && userLatLon[0] != 0.0 && userLatLon[1] != 0.0
+        }
 
 
     /**
@@ -190,7 +185,7 @@ class FindMapFragment : BaseFragment<FragmentFindMapBinding, FindMapViewModel>()
         )
         if (!isRoute && viewModel.offRoute != -1) {
             mapNotify("경로를 이탈하셨습니다")
-            if(WAY_OFF_ROUTE_MAX_COUNT <= viewModel.offRoute){
+            if (WAY_OFF_ROUTE_MAX_COUNT <= viewModel.offRoute) {
                 clearMap()
                 Log.d("lys", "경로이탈 --> ${isRoute}")
 //            speakTTS("경로를 이탈하셨습니다")
@@ -233,8 +228,93 @@ class FindMapFragment : BaseFragment<FragmentFindMapBinding, FindMapViewModel>()
 //            speakTTS(viewModel.arrayLatLngRouteTitle[viewModel.arrayLatLngIndex])
             mapNotify(viewModel.arrayLatLngWPTitle[viewModel.arrayLatLngIndex])
             viewModel.arrayLatLngIndex++
+
+            if(viewModel.arrayLatLngIndex >= viewModel.arrayLatLngWayPoint.size){
+                endRouteGuidance(true)
+            }
         }
     }
+
+    /**
+     * 경로 안내 시작
+     */
+    @SuppressLint("MissingPermission")
+    private fun startRouteGuidance() {
+        locationManager!!.requestLocationUpdates(
+            locationManager!!.getBestProvider(Criteria(), false)!!, 2000, 1.0f, locationListener
+        )
+        viewModel.run {
+            endName = arguments?.getString("name")
+            endLon = arguments?.getString("endLon")?.toDouble()
+            endLat = arguments?.getString("endLat")?.toDouble()
+            userLatLon[0] = arguments?.getString("startLat")?.toDouble() ?: 0.0
+            userLatLon[1] = arguments?.getString("startLon")?.toDouble() ?: 0.0
+
+            /**
+             * 도착 지점 마커 추가
+             * 길찾기 api 호출
+             */
+            if (gpsDataSettingCheck()) {
+                openStreetMapNavigation(endLat!!, endLon!!)
+                addMarker(endLat!!, endLon!!, endName!!)
+            }
+        }
+    }
+
+    /**
+     * 경로 안내 종료
+     */
+    private fun endRouteGuidance(isComplete: Boolean) {
+        Log.d("lys","endRouteGuidance")
+        if (isComplete) {
+            clearMap()
+        }
+
+    }
+
+
+    /**
+     * wp 이벤트 텍스트
+     */
+    private fun wpEventTitle(type: String, modifier: String): String {
+        return when (type) {
+            GpsConstants.WayPoint.DEPART -> {
+                "경로안내를 시작합니다."
+            }
+            GpsConstants.WayPoint.ARRIVE -> {
+                "목적지 주변입니다. 경로 안내를 종료합니다."
+            }
+            else -> {
+                when (modifier) {
+                    GpsConstants.WayPoint.LEFT -> {
+                        "잠시 후 좌회전입니다."
+                    }
+                    GpsConstants.WayPoint.SLIGHT_LEFT -> {
+                        "잠시 후 10시 방향 좌회전입니다."
+                    }
+                    GpsConstants.WayPoint.RIGHT -> {
+                        "잠시 후 우회전입니다."
+                    }
+                    GpsConstants.WayPoint.SLIGHT_RIGHT -> {
+                        "잠시 후 2시 방향 우회전입니다."
+                    }
+                    GpsConstants.WayPoint.STRAIGHT -> {
+                        "이어서 직진입니다."
+                    }
+                    GpsConstants.WayPoint.U_TURN -> {
+                        "잠시 후 유턴입니다."
+                    }
+                    else -> ""
+                }
+            }
+        }
+    }
+
+    /**
+     * wp 이벤트 체크
+     */
+    private fun wpEventCheck(type: String): Boolean =
+        type == GpsConstants.WayPoint.ARRIVE || type == GpsConstants.WayPoint.DEPART
 
     /**
      * 지도 위 알림 텍스트 노출
@@ -253,9 +333,11 @@ class FindMapFragment : BaseFragment<FragmentFindMapBinding, FindMapViewModel>()
      * 프래그먼트 종료시 맵뷰 지워야 함 > 에러방지
      */
     override fun onDestroy() {
-        Log.d("lys","FindMapFragment onDestroy")
+        Log.d("lys", "FindMapFragment onDestroy")
         binding.mapView.removeView(mMapView)
         locationManager!!.removeUpdates(locationListener)
         super.onDestroy()
     }
+
+
 }

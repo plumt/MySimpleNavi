@@ -1,6 +1,7 @@
 package com.yun.mysimplenavi.ui.home
 
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -22,6 +23,8 @@ class HomeFragment : BaseFragment<FragmentHomeBinding, HomeViewModel>() {
     override val viewModel: HomeViewModel by viewModels()
     override fun setVariable(): Int = BR.home
     override fun getResourceId(): Int = R.layout.fragment_home
+    override fun isOnBackEvent(): Boolean = false
+    override fun onBackEvent() { }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)

@@ -18,6 +18,8 @@ class KeywordSearchFragment : BaseFragment<FragmentKeywordSearchBinding, Keyword
     override val viewModel: KeywordSearchViewModel by viewModels()
     override fun setVariable(): Int = BR.keyword
     override fun getResourceId(): Int = R.layout.fragment_keyword_search
+    override fun isOnBackEvent(): Boolean = false
+    override fun onBackEvent() { }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)

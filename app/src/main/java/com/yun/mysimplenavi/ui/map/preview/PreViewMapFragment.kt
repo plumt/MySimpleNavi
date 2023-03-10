@@ -25,6 +25,8 @@ class PreViewMapFragment : BaseFragment<FragmentPreviewMapBinding, PreViewMapVie
     override val viewModel: PreViewMapViewModel by viewModels()
     override fun getResourceId(): Int = R.layout.fragment_preview_map
     override fun setVariable(): Int = BR.preview
+    override fun isOnBackEvent(): Boolean = false
+    override fun onBackEvent() { }
 
     private var mMapView: MapView? = null
 

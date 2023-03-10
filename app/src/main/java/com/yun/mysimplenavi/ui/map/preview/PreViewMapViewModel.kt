@@ -21,7 +21,7 @@ class PreViewMapViewModel @Inject constructor(
     /**
      * 통신 중 로딩 프로그레스바 노출
      */
-    val isLoading = MutableLiveData(false)
+    val isLoading = MutableLiveData(true)
 
     /**
      * openstreetmap result data

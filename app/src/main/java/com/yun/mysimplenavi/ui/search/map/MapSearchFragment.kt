@@ -26,6 +26,8 @@ class MapSearchFragment : BaseFragment<FragmentMapSearchBinding, MapSearchViewMo
     override val viewModel: MapSearchViewModel by viewModels()
     override fun getResourceId(): Int = R.layout.fragment_map_search
     override fun setVariable(): Int = BR.map
+    override fun isOnBackEvent(): Boolean = false
+    override fun onBackEvent() { }
 
     private var mMapView: MapView? = null
 

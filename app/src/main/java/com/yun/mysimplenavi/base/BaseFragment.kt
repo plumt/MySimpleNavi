@@ -1,9 +1,11 @@
 package com.yun.mysimplenavi.base
 
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.activity.addCallback
 import androidx.annotation.LayoutRes
 import androidx.databinding.DataBindingUtil
 import androidx.databinding.ViewDataBinding
@@ -27,6 +29,10 @@ abstract class BaseFragment<B : ViewDataBinding, M : ViewModel> : Fragment() {
     @LayoutRes
     abstract fun getResourceId(): Int
 
+    abstract fun onBackEvent()
+
+    abstract fun isOnBackEvent(): Boolean
+
     val sharedViewModel: MainViewModel by activityViewModels()
 
     fun navigate(resId: Int, bundle: Bundle? = null, options: NavOptions? = null) {
@@ -34,7 +40,7 @@ abstract class BaseFragment<B : ViewDataBinding, M : ViewModel> : Fragment() {
 //            bundle?.apply {
 //                view?.findNavController()?.navigate(resId, this,options)
 //            } ?: view?.findNavController()?.navigate(resId,bundle,options)
-            view?.findNavController()?.navigate(resId,bundle,options)
+            view?.findNavController()?.navigate(resId, bundle, options)
         } catch (e: Exception) {
             e.printStackTrace()
         }
@@ -54,6 +60,13 @@ abstract class BaseFragment<B : ViewDataBinding, M : ViewModel> : Fragment() {
         super.onViewCreated(view, savedInstanceState)
         binding.setVariable(setVariable(), viewModel)
         binding.setVariable(BR.main, sharedViewModel)
+
+        if (isOnBackEvent()) {
+            requireActivity().onBackPressedDispatcher.addCallback(viewLifecycleOwner) {
+                onBackEvent()
+            }
+        }
+
 
     }
 }

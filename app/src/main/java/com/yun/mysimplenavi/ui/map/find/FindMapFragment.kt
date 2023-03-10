@@ -24,6 +24,7 @@ import com.yun.mysimplenavi.common.constants.GpsConstants.Companion.WAY_OFF_ROUT
 import com.yun.mysimplenavi.common.constants.GpsConstants.Distance.WAY_OFF_DISTANCE
 import com.yun.mysimplenavi.common.constants.GpsConstants.Distance.WAY_POINT_DISTANCE
 import com.yun.mysimplenavi.databinding.FragmentFindMapBinding
+import com.yun.mysimplenavi.ui.dialog.ButtonPopup
 import com.yun.mysimplenavi.util.PolyUtil.isLocationOnEdge
 import com.yun.mysimplenavi.util.PolyUtil.isLocationOnPath
 import dagger.hilt.android.AndroidEntryPoint
@@ -36,7 +37,17 @@ class FindMapFragment : BaseFragment<FragmentFindMapBinding, FindMapViewModel>()
     override fun setVariable(): Int = BR.find
     override fun isOnBackEvent(): Boolean = true
     override fun onBackEvent() {
-        Toast.makeText(requireActivity(),"backEvent!",Toast.LENGTH_SHORT).show()
+        //TODO 여기에 안내 멘트 등을 일시 정지하는 코드 추가해야 함
+        ButtonPopup().apply {
+            showPopup(requireActivity(),"알림","안내를 종료하시겠습니까?")
+            setDialogListener(object : ButtonPopup.DialogListener{
+                override fun onResultClicked(result: Boolean) {
+                    if(result){
+                        findNavController().popBackStack()
+                    }
+                }
+            })
+        }
     }
 
     /**
@@ -338,6 +349,4 @@ class FindMapFragment : BaseFragment<FragmentFindMapBinding, FindMapViewModel>()
         locationManager!!.removeUpdates(locationListener)
         super.onDestroy()
     }
-
-
 }

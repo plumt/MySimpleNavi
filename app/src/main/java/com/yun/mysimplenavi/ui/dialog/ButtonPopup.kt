@@ -24,7 +24,8 @@ class ButtonPopup {
     fun showPopup(
         context: Context,
         title: String,
-        message: String
+        message: String,
+        isTwoButton: Boolean = false
     ) {
         AlertDialog.Builder(context).run {
             setCancelable(false)
@@ -44,6 +45,10 @@ class ButtonPopup {
 //                }
             }
             binding.run {
+
+                if(!isTwoButton){
+                    btnCancel.visibility = View.GONE
+                }
 
                 btnCancel.setOnClickListener {
                     myDialogListener.onResultClicked(false)

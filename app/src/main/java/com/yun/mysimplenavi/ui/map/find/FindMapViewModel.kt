@@ -66,7 +66,7 @@ class FindMapViewModel @Inject constructor(
     var endLon: Double? = null
     var endLat: Double? = null
     var endName: String? = null
-
+    
     /**
      * openstreetmap api 호출 함수
      * @param endLat 도착지점 위도 Double

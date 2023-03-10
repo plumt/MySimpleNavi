@@ -37,17 +37,7 @@ class FindMapFragment : BaseFragment<FragmentFindMapBinding, FindMapViewModel>()
     override fun setVariable(): Int = BR.find
     override fun isOnBackEvent(): Boolean = true
     override fun onBackEvent() {
-        //TODO 여기에 안내 멘트 등을 일시 정지하는 코드 추가해야 함
-        ButtonPopup().apply {
-            showPopup(requireActivity(),"알림","안내를 종료하시겠습니까?")
-            setDialogListener(object : ButtonPopup.DialogListener{
-                override fun onResultClicked(result: Boolean) {
-                    if(result){
-                        findNavController().popBackStack()
-                    }
-                }
-            })
-        }
+        endRouteGuidance(false)
     }
 
     /**
@@ -273,16 +263,38 @@ class FindMapFragment : BaseFragment<FragmentFindMapBinding, FindMapViewModel>()
     }
 
     /**
-     * 경로 안내 종료
+     * 경로 안내 종료 및 뒤로가기 버튼 이벤트
      */
     private fun endRouteGuidance(isComplete: Boolean) {
         Log.d("lys","endRouteGuidance")
+        clearMap()
+        mMapView!!.currentLocationTrackingMode = MapView.CurrentLocationTrackingMode.TrackingModeOff
         if (isComplete) {
-            clearMap()
+            locationManager!!.removeUpdates(locationListener)
+            showButtonPopup("안내를 종료합니다.", false)
+        } else {
+            showButtonPopup("안내를 종료하시겠습니까?", true)
         }
 
     }
 
+    private fun showButtonPopup(message: String, isTwoButton: Boolean = false){
+        ButtonPopup().apply {
+            showPopup(requireActivity(),"알림",message, isTwoButton)
+            setDialogListener(object : ButtonPopup.DialogListener{
+                override fun onResultClicked(result: Boolean) {
+                    if(result){
+                        // 뒤로가기 및 안내 완료
+                        findNavController().popBackStack()
+                    } else {
+                        viewModel.offRoute = -1
+                        viewModel.openStreetMapNavigation(viewModel.endLat!!, viewModel.endLon!!)
+                        addMarker(viewModel.endLat!!, viewModel.endLon!!, viewModel.endName!!)
+                    }
+                }
+            })
+        }
+    }
 
     /**
      * wp 이벤트 텍스트

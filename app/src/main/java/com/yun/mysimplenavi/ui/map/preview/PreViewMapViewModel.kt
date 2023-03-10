@@ -44,6 +44,15 @@ class PreViewMapViewModel @Inject constructor(
     var userLatLon = DoubleArray(2) { 0.0 }
 
     /**
+     * 길찾기 차 / 걸음
+     */
+    val isCar = MutableLiveData(true)
+
+    var lon: String? = null
+    var lat: String? = null
+    var name: String? = null
+
+    /**
      * openstreetmap api 호출 함수
      * @param startLat 시작지점 위도 Double
      * @param startLon 시작지점 경도 Double
@@ -61,7 +70,7 @@ class PreViewMapViewModel @Inject constructor(
         val end = "$endLon,$endLat"
         val path = start + end
         Log.d("lys", "path : $path")
-        api.openStreetMapNavi(isCar = true, path).observeOn(Schedulers.io())
+        api.openStreetMapNavi(isCar = isCar.value!!, path).observeOn(Schedulers.io())
             .subscribeOn(Schedulers.io())
             .flatMap { Observable.just(it) }
             .observeOn(AndroidSchedulers.mainThread())
@@ -99,3 +108,4 @@ class PreViewMapViewModel @Inject constructor(
         return result
     }
 }
+

@@ -66,7 +66,12 @@ class FindMapViewModel @Inject constructor(
     var endLon: Double? = null
     var endLat: Double? = null
     var endName: String? = null
-    
+
+    /**
+     * 길찾기 차 / 걸음
+     */
+    val isCar = MutableLiveData(true)
+
     /**
      * openstreetmap api 호출 함수
      * @param endLat 도착지점 위도 Double
@@ -78,7 +83,7 @@ class FindMapViewModel @Inject constructor(
         val end = "$endLon,$endLat"
         val path = start + end
         Log.d("lys", "path : $path")
-        api.openStreetMapNavi(isCar = true, path).observeOn(Schedulers.io())
+        api.openStreetMapNavi(isCar = isCar.value!!, path).observeOn(Schedulers.io())
             .subscribeOn(Schedulers.io())
             .flatMap { Observable.just(it) }
             .observeOn(AndroidSchedulers.mainThread())

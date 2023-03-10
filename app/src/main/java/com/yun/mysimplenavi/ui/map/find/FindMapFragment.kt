@@ -1,7 +1,6 @@
 package com.yun.mysimplenavi.ui.map.find
 
 import android.annotation.SuppressLint
-import android.app.AlertDialog
 import android.content.Context
 import android.graphics.Color
 import android.location.Criteria
@@ -12,7 +11,6 @@ import android.os.Bundle
 import android.os.Handler
 import android.util.Log
 import android.view.View
-import android.widget.Toast
 import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
 import com.google.android.gms.maps.model.LatLng
@@ -22,13 +20,15 @@ import com.yun.mysimplenavi.base.BaseFragment
 import com.yun.mysimplenavi.common.constants.GpsConstants
 import com.yun.mysimplenavi.common.constants.GpsConstants.Companion.WAY_OFF_ROUTE_MAX_COUNT
 import com.yun.mysimplenavi.common.constants.GpsConstants.Distance.WAY_OFF_DISTANCE
-import com.yun.mysimplenavi.common.constants.GpsConstants.Distance.WAY_POINT_DISTANCE
+import com.yun.mysimplenavi.common.constants.GpsConstants.Distance.WAY_POINT_DISTANCE_CAR
+import com.yun.mysimplenavi.common.constants.GpsConstants.Distance.WAY_POINT_DISTANCE_FOOT
 import com.yun.mysimplenavi.databinding.FragmentFindMapBinding
 import com.yun.mysimplenavi.ui.dialog.ButtonPopup
 import com.yun.mysimplenavi.util.PolyUtil.isLocationOnEdge
 import com.yun.mysimplenavi.util.PolyUtil.isLocationOnPath
 import dagger.hilt.android.AndroidEntryPoint
 import net.daum.mf.map.api.*
+import java.text.SimpleDateFormat
 
 @AndroidEntryPoint
 class FindMapFragment : BaseFragment<FragmentFindMapBinding, FindMapViewModel>() {
@@ -53,9 +53,13 @@ class FindMapFragment : BaseFragment<FragmentFindMapBinding, FindMapViewModel>()
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        mMapView = MapView(requireActivity())
+        try {
+            mMapView = MapView(requireActivity())
+            binding.mapView.addView(mMapView)
+        } catch (e: Exception){
+            findNavController().popBackStack()
+        }
 
-        binding.mapView.addView(mMapView)
 
         locationManager =
             requireActivity().getSystemService(Context.LOCATION_SERVICE) as LocationManager
@@ -91,7 +95,8 @@ class FindMapFragment : BaseFragment<FragmentFindMapBinding, FindMapViewModel>()
                 locationOnPathCheck()
                 locationWayPoint()
             }
-//            Log.d("lys", "location : ${p0.latitude} ${p0.longitude} ${SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(p0.time)}")
+//            addMarker(p0.latitude,p0.longitude,"내 위치")
+//            Log.d("lys", "${p0.provider})location : ${p0.latitude} ${p0.longitude} ${SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(p0.time)}")
         }
     }
 
@@ -219,7 +224,7 @@ class FindMapFragment : BaseFragment<FragmentFindMapBinding, FindMapViewModel>()
             LatLng(viewModel.userLatLon[0], viewModel.userLatLon[1]),
             arrayLatLngVia,
             true,
-            WAY_POINT_DISTANCE
+            if(viewModel.isCar.value!!) WAY_POINT_DISTANCE_CAR else WAY_POINT_DISTANCE_FOOT
         )
         if (isWayPoint) {
             Log.d(
@@ -241,15 +246,23 @@ class FindMapFragment : BaseFragment<FragmentFindMapBinding, FindMapViewModel>()
      */
     @SuppressLint("MissingPermission")
     private fun startRouteGuidance() {
+
         locationManager!!.requestLocationUpdates(
-            locationManager!!.getBestProvider(Criteria(), false)!!, 2000, 1.0f, locationListener
+            locationManager!!.getBestProvider(Criteria(), true)!!, 2000, 0.0f, locationListener
         )
+//        locationManager!!.requestLocationUpdates(
+//            LocationManager.GPS_PROVIDER, 2000, 0.0f, locationListener
+//        )
+//        locationManager!!.requestLocationUpdates(
+//            LocationManager.NETWORK_PROVIDER, 2000, 0.0f, locationListener
+//        )
         viewModel.run {
             endName = arguments?.getString("name")
             endLon = arguments?.getString("endLon")?.toDouble()
             endLat = arguments?.getString("endLat")?.toDouble()
             userLatLon[0] = arguments?.getString("startLat")?.toDouble() ?: 0.0
             userLatLon[1] = arguments?.getString("startLon")?.toDouble() ?: 0.0
+            isCar.value = arguments?.getBoolean("isCar")
 
             /**
              * 도착 지점 마커 추가

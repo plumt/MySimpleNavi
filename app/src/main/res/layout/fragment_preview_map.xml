@@ -47,9 +47,52 @@
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toEndOf="@id/tv_duration" />
 
-        <Button
+        <com.google.android.material.button.MaterialButton
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            android:text="c"
+            android:layout_margin="2dp"
+            android:insetTop="0dp"
+            android:insetRight="0dp"
+            android:insetLeft="0dp"
+            android:insetBottom="0dp"
+            android:clickable="@{!preview.isCar}"
+            android:textSize="14sp"
+            android:backgroundTint="@{preview.isCar ? @color/color_534713 : @color/color_979797}"
+            android:id="@+id/btn_car"
+            />
+
+        <com.google.android.material.button.MaterialButton
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:layout_margin="2dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toEndOf="@+id/btn_car"
+            android:text="f"
+            android:textSize="14sp"
+            android:insetTop="0dp"
+            android:insetRight="0dp"
+            android:insetLeft="0dp"
+            android:clickable="@{preview.isCar}"
+            android:insetBottom="0dp"
+            android:backgroundTint="@{preview.isCar ? @color/color_979797 : @color/color_534713}"
+            android:includeFontPadding="false"
+            android:id="@+id/btn_foot"
+            />
+
+        <com.google.android.material.button.MaterialButton
+            android:insetTop="0dp"
+            android:insetRight="0dp"
+            android:insetLeft="0dp"
+            android:insetBottom="0dp"
             android:id="@+id/btn_find"
-            android:layout_width="match_parent"
+            android:backgroundTint="@color/color_FBA53B"
+            android:layout_width="0dp"
+            android:layout_margin="2dp"
+            app:layout_constraintStart_toEndOf="@id/btn_foot"
+            app:layout_constraintEnd_toEndOf="parent"
             android:layout_height="50dp"
             android:visibility="@{preview.distance.equals(``) ? View.INVISIBLE : View.VISIBLE}"
             android:text="길찾기"

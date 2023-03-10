@@ -8,7 +8,8 @@ class GpsConstants {
     }
 
     object Distance {
-        const val WAY_POINT_DISTANCE = 30.0
+        const val WAY_POINT_DISTANCE_CAR = 30.0
+        const val WAY_POINT_DISTANCE_FOOT = 15.0
         const val WAY_OFF_DISTANCE = 50.0
     }
 

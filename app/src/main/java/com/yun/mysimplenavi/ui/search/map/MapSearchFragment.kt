@@ -40,19 +40,25 @@ class MapSearchFragment : BaseFragment<FragmentMapSearchBinding, MapSearchViewMo
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        mMapView = MapView(requireActivity())
-        mMapView!!.currentLocationTrackingMode = MapView.CurrentLocationTrackingMode.TrackingModeOff
-        mMapView!!.setShowCurrentLocationMarker(false)
+        try {
+            mMapView = MapView(requireActivity())
+            mMapView!!.currentLocationTrackingMode = MapView.CurrentLocationTrackingMode.TrackingModeOff
+            mMapView!!.setShowCurrentLocationMarker(false)
 //        mMapView!!.setZoomLevel(2, true)
+            binding.mapView.addView(mMapView)
+        } catch (e: Exception){
+            findNavController().popBackStack()
+        }
 
-        binding.mapView.addView(mMapView)
+
+
 
         locationManager =
             requireActivity().getSystemService(Context.LOCATION_SERVICE) as LocationManager
 
-        locationManager!!.requestLocationUpdates(
-            locationManager!!.getBestProvider(Criteria(), false)!!, 2000, 1.0f, locationListener
-        )
+//        locationManager!!.requestLocationUpdates(
+//            locationManager!!.getBestProvider(Criteria(), false)!!, 2000, 1.0f, locationListener
+//        )
 
         locationManager!!.getLastKnownLocation(locationManager!!.getBestProvider(Criteria(), false)!!)?.run {
             mMapView!!.setMapCenterPointAndZoomLevel(MapPoint.mapPointWithGeoCoord(latitude, longitude), 2, true)
@@ -86,16 +92,16 @@ class MapSearchFragment : BaseFragment<FragmentMapSearchBinding, MapSearchViewMo
     /**
      * gps cahnged listener
      */
-    @SuppressLint("MissingPermission")
-    private val locationListener = object : LocationListener {
-
-        override fun onLocationChanged(p0: Location) { }
-    }
+//    @SuppressLint("MissingPermission")
+//    private val locationListener = object : LocationListener {
+//
+//        override fun onLocationChanged(p0: Location) { }
+//    }
 
     override fun onDestroy() {
         Log.d("lys","MapFragment onDestroy")
         binding.mapView.removeView(mMapView)
-        locationManager!!.removeUpdates(locationListener)
+//        locationManager!!.removeUpdates(locationListener)
         super.onDestroy()
     }
 }

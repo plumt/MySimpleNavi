@@ -15,6 +15,9 @@ interface Api {
     @GET("/v2/local/search/keyword.json")
     fun searchKeywordToCode(
         @Query("query") keyword: String,
+        @Query("x") x: String,
+        @Query("y") y: String,
+        @Query("page") page: Int,
         @Header("Authorization") Authorization: String = "KakaoAK 8ee9bf4ad1ec5983e0f32a8c55fc2a95"
     ): Observable<KeywordSearchModel.RS>
 

@@ -6,7 +6,9 @@ import javax.inject.Inject
 
 class ApiRepository @Inject constructor(private val api: Api) {
 
-    fun searchKeyword(keyword: String) = api.searchKeywordToCode(keyword)
+    fun searchKeyword(keyword: String, x: String, y: String, page: Int) =
+        api.searchKeywordToCode(keyword, x, y, page)
+
     fun searchCode(x: String, y: String) = api.searchCodeToKeyword(x, y)
 
     fun openStreetMapNavi(isCar: Boolean, path: String) =

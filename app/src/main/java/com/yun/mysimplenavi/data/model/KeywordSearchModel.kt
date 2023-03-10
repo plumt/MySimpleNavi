@@ -14,7 +14,8 @@ class KeywordSearchModel {
             val road_address_name: String,
             val place_name: String,
             @SerializedName("x") val lon: String,
-            @SerializedName("y") val lat: String
+            @SerializedName("y") val lat: String,
+            val distance: String
         ) : Item()
         data class Meta(
             val is_end: Boolean,

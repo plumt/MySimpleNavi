@@ -40,6 +40,8 @@ class MapSearchFragment : BaseFragment<FragmentMapSearchBinding, MapSearchViewMo
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+
+
         try {
             mMapView = MapView(requireActivity())
             mMapView!!.currentLocationTrackingMode = MapView.CurrentLocationTrackingMode.TrackingModeOff
@@ -69,6 +71,10 @@ class MapSearchFragment : BaseFragment<FragmentMapSearchBinding, MapSearchViewMo
             viewModel.centerLongitude = String.format("%.6f",centerLatLon.mapPointGeoCoord.longitude)
             viewModel.centerLatitude = String.format("%.6f",centerLatLon.mapPointGeoCoord.latitude)
             viewModel.callApi(viewModel.centerLatitude,viewModel.centerLongitude)
+        }
+
+        viewModel.isLoading.observe(viewLifecycleOwner){
+            sharedViewModel.isLoading.value = it
         }
 
         viewModel.addressName.observe(viewLifecycleOwner){

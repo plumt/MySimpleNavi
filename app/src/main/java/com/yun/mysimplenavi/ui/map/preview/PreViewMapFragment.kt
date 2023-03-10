@@ -10,6 +10,9 @@ import android.location.LocationManager
 import android.os.Bundle
 import android.util.Log
 import android.view.View
+import android.view.WindowManager
+import android.widget.Toast
+import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.viewModels
 import androidx.navigation.NavOptions
 import androidx.navigation.fragment.findNavController
@@ -17,6 +20,7 @@ import com.yun.mysimplenavi.R
 import com.yun.mysimplenavi.BR
 import com.yun.mysimplenavi.base.BaseFragment
 import com.yun.mysimplenavi.databinding.FragmentPreviewMapBinding
+import com.yun.mysimplenavi.ui.main.MainActivity
 import dagger.hilt.android.AndroidEntryPoint
 import net.daum.mf.map.api.*
 
@@ -26,7 +30,7 @@ class PreViewMapFragment : BaseFragment<FragmentPreviewMapBinding, PreViewMapVie
     override fun getResourceId(): Int = R.layout.fragment_preview_map
     override fun setVariable(): Int = BR.preview
     override fun isOnBackEvent(): Boolean = false
-    override fun onBackEvent() { }
+    override fun onBackEvent() {}
 
     private var mMapView: MapView? = null
 
@@ -38,12 +42,13 @@ class PreViewMapFragment : BaseFragment<FragmentPreviewMapBinding, PreViewMapVie
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        try{
+        try {
             mMapView = MapView(requireActivity())
-            mMapView!!.currentLocationTrackingMode = MapView.CurrentLocationTrackingMode.TrackingModeOff
+            mMapView!!.currentLocationTrackingMode =
+                MapView.CurrentLocationTrackingMode.TrackingModeOff
             mMapView!!.setShowCurrentLocationMarker(false)
             binding.mapView.addView(mMapView)
-        } catch (e: Exception){
+        } catch (e: Exception) {
             findNavController().popBackStack()
         }
 
@@ -58,15 +63,19 @@ class PreViewMapFragment : BaseFragment<FragmentPreviewMapBinding, PreViewMapVie
 
 
         binding.btnFind.setOnClickListener {
-            binding.mapView.removeView(mMapView)
-            navigate(R.id.action_preViewMapFragment_to_findMapFragment, Bundle().apply {
-                putString("endLon", viewModel.lon)
-                putString("endLat", viewModel.lat)
-                putString("startLon",viewModel.userLatLon[1].toString())
-                putString("startLat",viewModel.userLatLon[0].toString())
-                putString("name", viewModel.name)
-                putBoolean("isCar", viewModel.isCar.value!!)
-            }, NavOptions.Builder().setPopUpTo(R.id.preViewMapFragment, true).build())
+            if (viewModel.distanceCheck <= 50.0) {
+                Toast.makeText(requireActivity(), "목적지와의 거리가 너무 가깝습니다.", Toast.LENGTH_SHORT).show()
+            } else {
+                binding.mapView.removeView(mMapView)
+                navigate(R.id.action_preViewMapFragment_to_findMapFragment, Bundle().apply {
+                    putString("endLon", viewModel.lon)
+                    putString("endLat", viewModel.lat)
+                    putString("startLon", viewModel.userLatLon[1].toString())
+                    putString("startLat", viewModel.userLatLon[0].toString())
+                    putString("name", viewModel.name)
+                    putBoolean("isCar", viewModel.isCar.value!!)
+                }, NavOptions.Builder().setPopUpTo(R.id.preViewMapFragment, true).build())
+            }
         }
 
         binding.btnCar.setOnClickListener {
@@ -109,13 +118,13 @@ class PreViewMapFragment : BaseFragment<FragmentPreviewMapBinding, PreViewMapVie
 //                addMarker(lat.toDouble(), lon.toDouble(), name)
 //            }
 //        }
-        viewModel.isCar.observe(viewLifecycleOwner){
+        viewModel.isCar.observe(viewLifecycleOwner) {
             callApi()
         }
     }
 
     @SuppressLint("MissingPermission")
-    private fun callApi(){
+    private fun callApi() {
         clearMap()
 //        locationManager!!.requestLocationUpdates(
 //            locationManager!!.getBestProvider(Criteria(), false)!!, 2000, 1.0f, locationListener
@@ -137,8 +146,9 @@ class PreViewMapFragment : BaseFragment<FragmentPreviewMapBinding, PreViewMapVie
                     viewModel.lon!!.toDouble()
                 )
 //            mMapView!!.setMapCenterPointAndZoomLevel(MapPoint.mapPointWithGeoCoord(lat.toDouble(),lon.toDouble()),0,true)
-                addMarker(latitude, longitude, "start")
-                addMarker(viewModel.lat!!.toDouble(), viewModel.lon!!.toDouble(), viewModel.name!!)
+
+//                addMarker(latitude, longitude, "start")
+//                addMarker(viewModel.lat!!.toDouble(), viewModel.lon!!.toDouble(), viewModel.name!!)
             }
         }
     }
@@ -157,29 +167,38 @@ class PreViewMapFragment : BaseFragment<FragmentPreviewMapBinding, PreViewMapVie
      */
     private fun addPolyLine() {
         val mPolyline = MapPolyline()
-        MapPolyline().apply {
-            lineColor = Color.argb(255, 255, 51, 0)
-//            viewModel.openStreetRoutes.value!!.routes!![0].legs!![0].steps!!.forEach {
-//                addPoint(
-//                    MapPoint.mapPointWithGeoCoord(
-//                        it.maneuver!!.location[1],
-//                        it.maneuver!!.location[0]
-//                    )
-//                )
-//            }
-            viewModel.openStreetRoutes.value!!.routes!![0].legs!![0].steps!!.forEach {
-                it.intersections?.forEach { its ->
-                    addPoint(
-                        MapPoint.mapPointWithGeoCoord(
-                            its.location[1],
-                            its.location[0]
-                        )
-                    )
-                }
-            }
+        try {
+            MapPolyline().apply {
+                lineColor = Color.argb(255, 255, 51, 0)
 
-            mMapView!!.addPolyline(this)
-            mPolyline.addPoints(this.mapPoints)
+                viewModel.openStreetRoutes.value!!.routes!![0].legs!![0].steps!![0].intersections?.run {
+                    addMarker(this[0].location[1], this[0].location[0], "start")
+                }
+
+                viewModel.openStreetRoutes.value!!.routes!![0].legs!![0].steps!!.run {
+                    this[this.size-  1].intersections?.run {
+                        addMarker(this[this.size - 1].location[1], this[this.size - 1].location[0], viewModel.name!!)
+                    }
+                }
+
+                viewModel.openStreetRoutes.value!!.routes!![0].legs!![0].steps!!.forEach {
+                    it.intersections?.forEachIndexed { index, its ->
+                        addPoint(
+                            MapPoint.mapPointWithGeoCoord(
+                                its.location[1],
+                                its.location[0]
+                            )
+                        )
+                    }
+                }
+
+                mMapView!!.addPolyline(this)
+                mPolyline.addPoints(this.mapPoints)
+            }
+        } catch (e: Exception) {
+            Log.e("lys", "PreViewMapFragment addPolyLine error : ${e.message}")
+            Toast.makeText(requireActivity(), "서버와의 에러가 발생했습니다.", Toast.LENGTH_SHORT).show()
+            findNavController().popBackStack()
         }
         mMapView!!.moveCamera(
             CameraUpdateFactory.newMapPointBounds(

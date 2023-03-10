@@ -16,6 +16,7 @@ import androidx.navigation.NavOptions
 import androidx.navigation.findNavController
 import com.yun.mysimplenavi.BR
 import com.yun.mysimplenavi.R
+import com.yun.mysimplenavi.ui.main.MainActivity
 import com.yun.mysimplenavi.ui.main.MainViewModel
 
 abstract class BaseFragment<B : ViewDataBinding, M : ViewModel> : Fragment() {

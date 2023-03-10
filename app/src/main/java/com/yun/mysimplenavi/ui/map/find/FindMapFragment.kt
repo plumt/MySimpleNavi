@@ -11,6 +11,7 @@ import android.os.Bundle
 import android.os.Handler
 import android.util.Log
 import android.view.View
+import android.widget.Toast
 import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
 import com.google.android.gms.maps.model.LatLng
@@ -56,7 +57,7 @@ class FindMapFragment : BaseFragment<FragmentFindMapBinding, FindMapViewModel>()
         try {
             mMapView = MapView(requireActivity())
             binding.mapView.addView(mMapView)
-        } catch (e: Exception){
+        } catch (e: Exception) {
             findNavController().popBackStack()
         }
 
@@ -108,44 +109,51 @@ class FindMapFragment : BaseFragment<FragmentFindMapBinding, FindMapViewModel>()
             MapView.CurrentLocationTrackingMode.TrackingModeOnWithHeading
 
         mMapView!!.setZoomLevel(0, true)
-        val mPolyline = MapPolyline()
-        MapPolyline().apply {
-            lineColor = Color.argb(255, 255, 51, 0)
-            viewModel.openStreetRoutes.value!!.routes!![0].legs!![0].steps!!.forEach {
-                it.intersections?.forEach { its ->
-                    addPoint(
-                        MapPoint.mapPointWithGeoCoord(
-                            its.location[1],
-                            its.location[0]
+        try {
+            val mPolyline = MapPolyline()
+            MapPolyline().apply {
+                lineColor = Color.argb(255, 255, 51, 0)
+                viewModel.openStreetRoutes.value!!.routes!![0].legs!![0].steps!!.forEach {
+                    it.intersections?.forEach { its ->
+                        addPoint(
+                            MapPoint.mapPointWithGeoCoord(
+                                its.location[1],
+                                its.location[0]
+                            )
+                        )
+                        viewModel.arrayLatLngRoute.add(
+                            LatLng(
+                                its.location[1],
+                                its.location[0]
+                            )
+                        )
+                    }
+                    viewModel.arrayLatLngWayPoint.add(
+                        LatLng(
+                            it.maneuver!!.location[1],
+                            it.maneuver.location[0]
                         )
                     )
-                    viewModel.arrayLatLngRoute.add(
-                        LatLng(
-                            its.location[1],
-                            its.location[0]
+                    viewModel.arrayLatLngWPTitle.add(
+                        wpEventTitle(
+                            it.maneuver.type,
+                            it.maneuver.modifier
                         )
+                    )
+                    addMarker(
+                        it.maneuver.location[1], it.maneuver.location[0],
+                        if (wpEventCheck(it.maneuver.type)) it.maneuver.type else it.maneuver.modifier
                     )
                 }
-                viewModel.arrayLatLngWayPoint.add(
-                    LatLng(
-                        it.maneuver!!.location[1],
-                        it.maneuver.location[0]
-                    )
-                )
-                viewModel.arrayLatLngWPTitle.add(
-                    wpEventTitle(
-                        it.maneuver.type,
-                        it.maneuver.modifier
-                    )
-                )
-                addMarker(
-                    it.maneuver.location[1], it.maneuver.location[0],
-                    if (wpEventCheck(it.maneuver.type)) it.maneuver.type else it.maneuver.modifier
-                )
-            }
 
-            mMapView!!.addPolyline(this)
-            mPolyline.addPoints(this.mapPoints)
+                mMapView!!.addPolyline(this)
+                mPolyline.addPoints(this.mapPoints)
+
+            }
+        } catch (e: Exception) {
+            Log.e("lys", "PreViewMapFragment addPolyLine error : ${e.message}")
+            Toast.makeText(requireActivity(), "서버와의 에러가 발생했습니다.", Toast.LENGTH_SHORT).show()
+            findNavController().popBackStack()
         }
     }
 
@@ -224,7 +232,7 @@ class FindMapFragment : BaseFragment<FragmentFindMapBinding, FindMapViewModel>()
             LatLng(viewModel.userLatLon[0], viewModel.userLatLon[1]),
             arrayLatLngVia,
             true,
-            if(viewModel.isCar.value!!) WAY_POINT_DISTANCE_CAR else WAY_POINT_DISTANCE_FOOT
+            if (viewModel.isCar.value!!) WAY_POINT_DISTANCE_CAR else WAY_POINT_DISTANCE_FOOT
         )
         if (isWayPoint) {
             Log.d(
@@ -235,7 +243,7 @@ class FindMapFragment : BaseFragment<FragmentFindMapBinding, FindMapViewModel>()
             mapNotify(viewModel.arrayLatLngWPTitle[viewModel.arrayLatLngIndex])
             viewModel.arrayLatLngIndex++
 
-            if(viewModel.arrayLatLngIndex >= viewModel.arrayLatLngWayPoint.size){
+            if (viewModel.arrayLatLngIndex >= viewModel.arrayLatLngWayPoint.size) {
                 endRouteGuidance(true)
             }
         }
@@ -279,7 +287,7 @@ class FindMapFragment : BaseFragment<FragmentFindMapBinding, FindMapViewModel>()
      * 경로 안내 종료 및 뒤로가기 버튼 이벤트
      */
     private fun endRouteGuidance(isComplete: Boolean) {
-        Log.d("lys","endRouteGuidance")
+        Log.d("lys", "endRouteGuidance")
         clearMap()
         mMapView!!.currentLocationTrackingMode = MapView.CurrentLocationTrackingMode.TrackingModeOff
         if (isComplete) {
@@ -291,12 +299,12 @@ class FindMapFragment : BaseFragment<FragmentFindMapBinding, FindMapViewModel>()
 
     }
 
-    private fun showButtonPopup(message: String, isTwoButton: Boolean = false){
+    private fun showButtonPopup(message: String, isTwoButton: Boolean = false) {
         ButtonPopup().apply {
-            showPopup(requireActivity(),"알림",message, isTwoButton)
-            setDialogListener(object : ButtonPopup.DialogListener{
+            showPopup(requireActivity(), "알림", message, isTwoButton)
+            setDialogListener(object : ButtonPopup.DialogListener {
                 override fun onResultClicked(result: Boolean) {
-                    if(result){
+                    if (result) {
                         // 뒤로가기 및 안내 완료
                         findNavController().popBackStack()
                     } else {

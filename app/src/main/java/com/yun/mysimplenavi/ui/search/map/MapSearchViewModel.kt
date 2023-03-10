@@ -20,7 +20,13 @@ class MapSearchViewModel @Inject constructor(
     var centerLatitude = ""
     var centerLongitude = ""
 
+    /**
+     * 통신 중 로딩 프로그레스바 노출
+     */
+    val isLoading = MutableLiveData(false)
+
     fun callApi(lat: String, lon: String) {
+        isLoading.value = true
         api.searchCode(lon, lat).observeOn(Schedulers.io()).subscribeOn(Schedulers.io())
             .flatMap { Observable.just(it) }
             .observeOn(AndroidSchedulers.mainThread())
@@ -30,8 +36,10 @@ class MapSearchViewModel @Inject constructor(
                     addressName.value = it.documents?.get(0)?.address_name?:"null"
                 }
             }.subscribe({
+                isLoading.value = false
                 Log.d("lys", "success")
             }, {
+                isLoading.value = false
                 Log.e("lys", "fail > ${it.message}")
             })
     }

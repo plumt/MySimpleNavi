@@ -14,47 +14,76 @@
 
     <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
         android:layout_width="match_parent"
-        android:onClick="@{(v) -> keywordSearchListener.onItemClick(itemKeywordSearch, v)}"
-        android:layout_height="40dp">
+        android:layout_height="60dp"
+        android:background="@color/white"
+        android:onClick="@{(v) -> keywordSearchListener.onItemClick(itemKeywordSearch, v)}">
 
         <TextView
             android:id="@+id/tv_place_name"
-            android:layout_width="match_parent"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
+            android:layout_marginEnd="5dp"
+            android:includeFontPadding="false"
+            android:maxLines="1"
             android:text="@{itemKeywordSearch.place_name}"
-            android:textSize="14sp"
-            app:layout_constraintBottom_toTopOf="@id/tv_road"
+            android:textColor="@color/black"
+            android:textSize="16sp"
+            app:layout_constraintBottom_toTopOf="@id/tv_address"
+            app:layout_constraintEnd_toStartOf="@id/tv_distance"
+            app:layout_constraintStart_toStartOf="@id/gl_start"
             app:layout_constraintTop_toTopOf="parent" />
 
         <TextView
-            android:id="@+id/tv_road"
-            android:layout_width="wrap_content"
+            android:id="@+id/tv_address"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:text="@{itemKeywordSearch.road_address_name}"
-            android:textSize="13sp"
+            android:layout_marginTop="5dp"
+            android:layout_marginEnd="5dp"
+            android:includeFontPadding="false"
+            android:maxLines="1"
+            android:text="@{itemKeywordSearch.road_address_name+`(`+itemKeywordSearch.address_name+`)`}"
+            android:textColor="@color/color_777777"
+            android:textSize="10sp"
             app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="@id/gl_half"
-            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toStartOf="@id/tv_distance"
+            app:layout_constraintStart_toStartOf="@id/gl_start"
             app:layout_constraintTop_toBottomOf="@id/tv_place_name" />
 
         <TextView
-            android:id="@+id/tv_address"
+            android:id="@+id/tv_distance"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@{`(`+itemKeywordSearch.address_name+`)`}"
-            android:textSize="11sp"
-            app:layout_constraintBottom_toBottomOf="@id/tv_road"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="@id/gl_half"
-            app:layout_constraintTop_toTopOf="@id/tv_road" />
+            android:gravity="center_vertical"
+            android:includeFontPadding="false"
+            android:text="@{itemKeywordSearch.distance}"
+            android:textColor="@color/black"
+            android:textSize="13sp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="@id/gl_end"
+            app:layout_constraintTop_toBottomOf="@id/tv_address"
+            app:layout_constraintTop_toTopOf="parent" />
 
+        <View
+            android:layout_width="0dp"
+            android:layout_height="1dp"
+            android:background="@color/color_cccccc"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="@id/gl_end"
+            app:layout_constraintStart_toStartOf="@id/gl_start" />
 
         <androidx.constraintlayout.widget.Guideline
-            android:id="@+id/gl_half"
+            android:id="@+id/gl_start"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            app:layout_constraintGuide_percent="0.5" />
+            app:layout_constraintGuide_percent="0.05" />
+
+        <androidx.constraintlayout.widget.Guideline
+            android:id="@+id/gl_end"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            app:layout_constraintGuide_percent="0.95" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 

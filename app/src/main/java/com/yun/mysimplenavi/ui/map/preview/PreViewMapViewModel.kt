@@ -52,6 +52,8 @@ class PreViewMapViewModel @Inject constructor(
     var lat: String? = null
     var name: String? = null
 
+    var distanceCheck = 0.0
+
     /**
      * openstreetmap api 호출 함수
      * @param startLat 시작지점 위도 Double
@@ -77,6 +79,7 @@ class PreViewMapViewModel @Inject constructor(
             .map {
                 Log.d("lys", "result : $it")
                 openStreetRoutes.value = it
+                distanceCheck = it.routes?.get(0)?.distance ?: 0.0
                 distance.value = Util.formatDistance(it.routes?.get(0)?.distance ?: 0.0)
                 val convertDuration =
                     Util.convertSeconds((it.routes?.get(0)?.duration?.toInt() ?: 0))
